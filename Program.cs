@@ -3,8 +3,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using server.Models;
-using server.Repository;
-using server.Repository.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,15 +26,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     };
 });
 
-builder.Services.AddDbContext<DatabaseContext>(options =>
+builder.Services.AddDbContext<HauCalendarContext>(options =>
 {
     options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection"))
         .LogTo(Console.WriteLine, LogLevel.Information)
         .EnableSensitiveDataLogging()
         .EnableDetailedErrors();
 });
-
-builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var app = builder.Build();
 
