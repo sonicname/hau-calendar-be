@@ -12,13 +12,33 @@ namespace server.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private HauCalendarContext _calendarContext;
-        public IConfiguration _configuration;
+        private readonly HauCalendarContext _calendarContext;
+        private readonly IConfiguration _configuration;
 
         public AuthController(IConfiguration config, HauCalendarContext calendarContext)
         {
             _calendarContext = calendarContext;
             _configuration = config;
+        }
+
+        private JwtSecurityToken? ClaimToken(String username)
+        {
+            var claims = new[] {
+                new Claim(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"]),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+                new Claim("Username", username),
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var token = new JwtSecurityToken(
+                _configuration["Jwt:Issuer"],
+                _configuration["Jwt:Audience"],
+                claims,
+                expires: DateTime.UtcNow.AddMinutes(10),
+                signingCredentials: signIn);
+            return token;
         }
 
         [HttpPost("signin")]
@@ -40,25 +60,8 @@ namespace server.Controllers
             {
                 return BadRequest("Invalid credentials");
             }
-            
-            var claims = new[] {
-                new Claim(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"]),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
-                new Claim("UserId", user.UserId.ToString()),
-                new Claim("Username", user.Username),
-            };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var token = new JwtSecurityToken(
-                _configuration["Jwt:Issuer"],
-                _configuration["Jwt:Audience"],
-                claims,
-                expires: DateTime.UtcNow.AddMinutes(10),
-                signingCredentials: signIn);
-
-            return Ok(new JwtSecurityTokenHandler().WriteToken(token));
+            return Ok(new JwtSecurityTokenHandler().WriteToken(ClaimToken(user.Username)));
         }
 
         [HttpPost("signup")]
@@ -83,24 +86,7 @@ namespace server.Controllers
 
             _calendarContext.SaveChanges();
 
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"]),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
-                new Claim("Username", authParams.Username),
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var token = new JwtSecurityToken(
-                _configuration["Jwt:Issuer"],
-                _configuration["Jwt:Audience"],
-                claims,
-                expires: DateTime.UtcNow.AddMinutes(10),
-                signingCredentials: signIn);
-
-            return Ok(new JwtSecurityTokenHandler().WriteToken(token));
+            return Ok(new JwtSecurityTokenHandler().WriteToken(ClaimToken(authParams.Username)));
         }
     }
 }
