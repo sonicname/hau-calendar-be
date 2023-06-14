@@ -30,7 +30,8 @@ public class ScheduleRepository
                 ScheduleTimeEnded = scl.ScheduleTimeEnded,
                 DateEnded = st.DateEnded,
                 DateStarted = st.DateStarted,       
-
+                LessonStarted = st.LessonStarted,
+                LessonEnded = st.LessonEnded
             }).ToList();
                  
          return all;
@@ -52,8 +53,8 @@ public class ScheduleRepository
     //    
     }
 
-    public Delete(int  id)
+    public void Delete(int  id)
     {
-        
+     
     }
 }
