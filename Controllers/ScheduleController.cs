@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using server.Models;
-
+using server.Repository;
 namespace server.Controllers;
 
 [Route("/api/schedule")]
@@ -9,16 +9,18 @@ public class ScheduleController : ControllerBase
 {
     private readonly HauCalendarContext _calendarContext;
     private readonly IConfiguration _configuration;
-    
-    public ScheduleController(IConfiguration config, HauCalendarContext calendarContext)
+    private readonly ScheduleRepository _scheduleRepository;
+    public ScheduleController(IConfiguration config, HauCalendarContext calendarContext,ScheduleRepository scheduleRepository)
     {
         _calendarContext = calendarContext;
         _configuration = config;
+        _scheduleRepository = scheduleRepository;
     }
 
     [HttpGet("get")]
-    public IActionResult GetSchedule(string userID)
+    public IActionResult GetSchedule(int userID)
     {
+        this._scheduleRepository.GetAll(userID);
         return Ok();
     }
 

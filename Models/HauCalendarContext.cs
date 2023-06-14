@@ -94,6 +94,7 @@ public partial class HauCalendarContext : DbContext
                 .HasMaxLength(30)
                 .HasColumnName("username");
         });
+        
 
         OnModelCreatingPartial(modelBuilder);
     }
