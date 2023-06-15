@@ -61,7 +61,11 @@ namespace server.Controllers
                 return BadRequest("Invalid credentials");
             }
 
-            return Ok(new JwtSecurityTokenHandler().WriteToken(ClaimToken(user.Username)));
+            return Ok(new AuthResponseDTO()
+            {
+                userID = user.UserId,
+                accessToken = new JwtSecurityTokenHandler().WriteToken(ClaimToken(user.Username))
+            });
         }
 
         [HttpPost("signup")]
@@ -86,7 +90,13 @@ namespace server.Controllers
 
             _calendarContext.SaveChanges();
 
-            return Ok(new JwtSecurityTokenHandler().WriteToken(ClaimToken(authParams.Username)));
+            var userAfterSave = _calendarContext.Users.FirstOrDefault(user => user.Username == authParams.Username);
+
+            return Ok(new AuthResponseDTO()
+            {
+                userID = userAfterSave.UserId,
+                accessToken = new JwtSecurityTokenHandler().WriteToken(ClaimToken(user.Username))
+            });
         }
     }
 }

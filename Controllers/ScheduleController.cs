@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using server.Models;
+using server.Models.DTO;
 using server.Repository;
 namespace server.Controllers;
 
@@ -20,14 +21,14 @@ public class ScheduleController : ControllerBase
     [HttpGet("get")]
     public IActionResult GetSchedule(int userID)
     {
-        this._scheduleRepository.GetAll(userID);
-        return Ok();
+        var schedules = _scheduleRepository.GetAll(userID);
+        return Ok(schedules);
     }
 
     [HttpPost("create")]
-    public IActionResult CreateSchedule() // missing params
+    public IActionResult CreateSchedule([FromBody] AddScheduleRequestDTO requestDto) // missing params
     {
-        return Ok();
+        return Ok(requestDto);
     }
     
     [HttpDelete("delete")]
