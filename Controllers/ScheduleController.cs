@@ -26,7 +26,7 @@ public class ScheduleController : ControllerBase
     }
 
     [HttpPost("create")]
-    public IActionResult CreateSchedule([FromBody] AddScheduleRequestDTO requestDto) // missing params
+    public IActionResult CreateSchedule([FromBody] AddScheduleDto requestDto) // missing params
     {
         return Ok(requestDto);
     }
