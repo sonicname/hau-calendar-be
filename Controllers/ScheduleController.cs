@@ -24,6 +24,7 @@ public class ScheduleController : ControllerBase
     [HttpPut("create")]
     public IActionResult CreateSchedule([FromBody] AddScheduleDto requestDto) // missing params
     {
+        _scheduleRepository.addSchedule(requestDto);
         return Ok(requestDto);
     }
 
