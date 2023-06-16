@@ -1,8 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using server.Models;
+﻿using server.Models;
 using server.Models.DTO;
-using System.Collections.Generic;
-
 
 namespace server.Repository;
 
@@ -17,23 +14,23 @@ public class ScheduleRepository
 
     public List<ScheduleViewDTO> GetAll(int userId)
     {
-        var all = (from sbj in _calendarContext.Subjects
-                   join scl in _calendarContext.Schedules on sbj.SubjectId equals scl.SubjectId
-                   join st in _calendarContext.ScheduleTimes on scl.ScheduleId equals st.ScheduleId
-                   where scl.UserId == userId
-                   select new ScheduleViewDTO
-                   {
-                       SubjectName = sbj.SubjectName,
-                       SubjectNumCredit = sbj.SubjectNumCredit,
-                       ScheduleTimeStarted = scl.ScheduleTimeStarted,
-                       ScheduleTimeEnded = scl.ScheduleTimeEnded,
-                       DateEnded = st.DateEnded,
-                       DateStarted = st.DateStarted,
-                       LessonStarted = st.LessonStarted,
-                       LessonEnded = st.LessonEnded
-                   }).ToList();
+        // var all = (from sbj in _calendarContext.Subjects
+        //            join scl in _calendarContext.Schedules on sbj.SubjectId equals scl.SubjectId
+        //            join st in _calendarContext.ScheduleTimes on scl.ScheduleId equals st.ScheduleId
+        //            where scl.UserId == userId
+        //            select new ScheduleViewDTO
+        //            {
+        //                SubjectName = sbj.SubjectName,
+        //                SubjectNumCredit = sbj.SubjectNumCredit,
+        //                ScheduleTimeStarted = scl.ScheduleTimeStarted,
+        //                ScheduleTimeEnded = scl.ScheduleTimeEnded,
+        //                DateEnded = st.DateEnded,
+        //                DateStarted = st.DateStarted,
+        //                LessonStarted = st.LessonStarted,
+        //                LessonEnded = st.LessonEnded
+        //            }).ToList();
 
-        return all;
+        // return all;
 
         //     List<ScheduleViewDTO> schedules =  _calendarContext.Subjects
         //         .Join(
