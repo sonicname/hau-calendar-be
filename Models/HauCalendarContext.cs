@@ -17,6 +17,8 @@ public partial class HauCalendarContext : DbContext
 
     public virtual DbSet<Schedule> Schedules { get; set; }
 
+    public virtual DbSet<ScheduleDayInWeek> ScheduleDayInWeeks { get; set; }
+
     public virtual DbSet<ScheduleTime> ScheduleTimes { get; set; }
 
     public virtual DbSet<Subject> Subjects { get; set; }
@@ -25,7 +27,7 @@ public partial class HauCalendarContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySQL("server=localhost;port=3306;user=developer;password=hellworld;database=hau-calendar;");
+        => optionsBuilder.UseMySQL("server=localhost;port=3306;user=developer;password=hellworld;database=hau-calendar");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -36,31 +38,40 @@ public partial class HauCalendarContext : DbContext
             entity.ToTable("schedule");
 
             entity.Property(e => e.ScheduleId).HasColumnName("scheduleID");
-            entity.Property(e => e.ScheduleTimeEnded).HasColumnName("scheduleTimeEnded");
-            entity.Property(e => e.ScheduleTimeStarted).HasColumnName("scheduleTimeStarted");
+            entity.Property(e => e.Location)
+                .HasDefaultValueSql("'1'")
+                .HasColumnName("location");
             entity.Property(e => e.SubjectId).HasColumnName("subjectID");
             entity.Property(e => e.UserId).HasColumnName("userID");
         });
 
+        modelBuilder.Entity<ScheduleDayInWeek>(entity =>
+        {
+            entity.HasKey(e => e.ScheduleDayInWeekId).HasName("PRIMARY");
+
+            entity.ToTable("scheduleDayInWeek");
+
+            entity.Property(e => e.ScheduleDayInWeekId).HasColumnName("scheduleDayInWeekID");
+            entity.Property(e => e.Day).HasColumnName("day");
+            entity.Property(e => e.LessonEnded).HasColumnName("lessonEnded");
+            entity.Property(e => e.LessonStarted).HasColumnName("lessonStarted");
+            entity.Property(e => e.ScheduleTimeId).HasColumnName("scheduleTimeID");
+        });
+
         modelBuilder.Entity<ScheduleTime>(entity =>
         {
-            entity.HasKey(e => e.ScheduleId).HasName("PRIMARY");
+            entity.HasKey(e => e.ScheduleTimeId).HasName("PRIMARY");
 
             entity.ToTable("scheduleTime");
 
-            entity.Property(e => e.ScheduleId).HasColumnName("scheduleID");
+            entity.Property(e => e.ScheduleTimeId).HasColumnName("scheduleTimeID");
             entity.Property(e => e.DateEnded)
                 .HasColumnType("date")
                 .HasColumnName("dateEnded");
             entity.Property(e => e.DateStarted)
                 .HasColumnType("date")
                 .HasColumnName("dateStarted");
-            entity.Property(e => e.LessonEnded)
-                .HasDefaultValueSql("'4'")
-                .HasColumnName("lessonEnded");
-            entity.Property(e => e.LessonStarted)
-                .HasDefaultValueSql("'1'")
-                .HasColumnName("lessonStarted");
+            entity.Property(e => e.ScheduleId).HasColumnName("scheduleID");
         });
 
         modelBuilder.Entity<Subject>(entity =>
@@ -94,7 +105,6 @@ public partial class HauCalendarContext : DbContext
                 .HasMaxLength(30)
                 .HasColumnName("username");
         });
-        
 
         OnModelCreatingPartial(modelBuilder);
     }

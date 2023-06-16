@@ -8,13 +8,9 @@ namespace server.Controllers;
 [ApiController]
 public class ScheduleController : ControllerBase
 {
-    private readonly HauCalendarContext _calendarContext;
-    private readonly IConfiguration _configuration;
     private readonly ScheduleRepository _scheduleRepository;
-    public ScheduleController(IConfiguration config, HauCalendarContext calendarContext,ScheduleRepository scheduleRepository)
+    public ScheduleController(ScheduleRepository scheduleRepository)
     {
-        _calendarContext = calendarContext;
-        _configuration = config;
         _scheduleRepository = scheduleRepository;
     }
 
@@ -25,12 +21,12 @@ public class ScheduleController : ControllerBase
         return Ok(schedules);
     }
 
-    [HttpPost("create")]
+    [HttpPut("create")]
     public IActionResult CreateSchedule([FromBody] AddScheduleRequestDTO requestDto) // missing params
     {
         return Ok(requestDto);
     }
-    
+
     [HttpDelete("delete")]
     public IActionResult DeleteSchedule(string scheduleID)
     {

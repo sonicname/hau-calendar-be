@@ -48,14 +48,14 @@ namespace server.Controllers
             {
                 return BadRequest("Username or Password is required!");
             }
-            
+
             var user = _calendarContext.Users.FirstOrDefault(user => user.Username == authParams.Username);
 
             if (user == null)
             {
                 return NotFound();
             }
-            
+
             if (user.Password != authParams.Password)
             {
                 return BadRequest("Invalid credentials");

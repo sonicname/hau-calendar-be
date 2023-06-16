@@ -11,7 +11,5 @@ public partial class Schedule
 
     public int? SubjectId { get; set; }
 
-    public int? ScheduleTimeStarted { get; set; }
-
-    public int? ScheduleTimeEnded { get; set; }
+    public int? Location { get; set; }
 }
