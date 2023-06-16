@@ -34,6 +34,22 @@ public class ScheduleRepository
                    }).ToList();
 
         return all;
+
+        //     List<ScheduleViewDTO> schedules =  _calendarContext.Subjects
+        //         .Join(
+        //             _calendarContext.Schedules.Join(
+        //
+        //                 ),
+        //                 subject => subject.SubjectId,
+        //                 schedule => schedule.SubjectId,
+        //             (subject,schedule) => new {Subject = subject,Schedule=schedule}
+        //             )
+        //         .Join(_calendarContext.ScheduleTimes,
+        //
+        //         )
+        //         .Where()
+        //         .ToList();
+        //
     }
 
     public void Delete(int id)

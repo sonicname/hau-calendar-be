@@ -1,6 +1,6 @@
 ﻿namespace server.Models.DTO;
 
-public class aScheduleTimeDTO
+public class ScheduleTimeDTO
 {
     public int ScheduleId { get; set; }
 
