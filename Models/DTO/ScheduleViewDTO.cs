@@ -7,13 +7,13 @@ public class ScheduleViewDTO
 
     public int? SubjectNumCredit { get; set; }
 
-    public DateTime? ScheduleTimeStarted { get; set; }
+    public DateTime DateStarted { get; set; }
 
-    public DateTime? ScheduleTimeEnded { get; set; }
-
-    public int? DateStarted { get; set; }
-
-    public int? DateEnded { get; set; }
+    public DateTime DateEnded { get; set; }
+    
+    public int Day { get; set; }
+    
+    public int? Location { get; set; }
 
     public int LessonStarted { get; set; }
 

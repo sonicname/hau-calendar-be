@@ -2,13 +2,10 @@
 
 public class ScheduleTimeDTO
 {
-    public int ScheduleId { get; set; }
+    public int ScheduleDayInWeekId { get; set; }
 
     public DateTime DateStarted { get; set; }
 
     public DateTime DateEnded { get; set; }
-
-    public int LessonStarted { get; set; }
-
-    public int LessonEnded { get; set; }
+    
 }
