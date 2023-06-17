@@ -14,4 +14,6 @@ public partial class ScheduleDayInWeek
     public int LessonEnded { get; set; }
 
     public int? ScheduleTimeId { get; set; }
+
+    public virtual ScheduleTime? ScheduleTime { get; set; }
 }

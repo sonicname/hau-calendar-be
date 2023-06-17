@@ -12,4 +12,8 @@ public partial class ScheduleTime
     public DateTime DateStarted { get; set; }
 
     public DateTime DateEnded { get; set; }
+
+    public virtual Schedule? Schedule { get; set; }
+
+    public virtual ICollection<ScheduleDayInWeek> ScheduleDayInWeeks { get; } = new List<ScheduleDayInWeek>();
 }
