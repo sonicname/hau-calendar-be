@@ -29,8 +29,9 @@ public class ScheduleController : ControllerBase
     }
 
     [HttpDelete("delete")]
-    public IActionResult DeleteSchedule(string scheduleID)
+    public IActionResult DeleteSchedule(int scheduleID)
     {
+        _scheduleRepository.RemoveSchudule(scheduleID);
         return Ok();
     }
 

@@ -2,6 +2,7 @@
 
 public class ScheduleDayInWeekDTO
 {
+    public int ScheduleDayInWeekId { get; set; }
     public int Day { get; set; }
 
     public int LessonStarted { get; set; }

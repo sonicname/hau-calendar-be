@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace server.Models;
+﻿namespace server.Models;
 
 public partial class ScheduleTime
 {
@@ -15,5 +12,5 @@ public partial class ScheduleTime
 
     public virtual Schedule? Schedule { get; set; }
 
-    public virtual ICollection<ScheduleDayInWeek> ScheduleDayInWeeks { get; } = new List<ScheduleDayInWeek>();
+    public virtual ICollection<ScheduleDayInWeek> ScheduleDayInWeeks { get; set; } = new List<ScheduleDayInWeek>();
 }

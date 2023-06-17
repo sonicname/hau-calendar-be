@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace server.Models.DTO;
+﻿namespace server.Models.DTO;
 
 public class AddScheduleDto
 {
