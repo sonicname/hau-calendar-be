@@ -64,7 +64,8 @@ namespace server.Controllers
             return Ok(new AuthResponseDTO()
             {
                 userID = user.UserId,
-                accessToken = new JwtSecurityTokenHandler().WriteToken(ClaimToken(user.Username))
+                accessToken = new JwtSecurityTokenHandler().WriteToken(ClaimToken(user.Username)),
+                username = user.Username
             });
         }
 

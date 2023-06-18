@@ -91,6 +91,47 @@ public class ScheduleRepository
         return null;
     }
 
+    public List<ScheduleDTO> GetScheduleByDate(int userId, DateTime date)
+    {
+        using var dbContext = new HauCalendarContext();
+
+        var schedules = dbContext.Schedules
+            .Where(schedule => schedule.UserId == userId)
+            .Include(schedule => schedule.Subject)
+            .Include(schedule => schedule.ScheduleTimes)
+            .ThenInclude(scheduleTime => scheduleTime.ScheduleDayInWeeks)
+            .Where(schedule => schedule.ScheduleTimes
+                .Any(scheduleTime => scheduleTime.DateStarted.Date <= date.Date && scheduleTime.DateEnded.Date >= date.Date))
+            .Select(schedule => new ScheduleDTO
+            {
+                ScheduleId = schedule.ScheduleId,
+                UserId = schedule.UserId,
+                Location = schedule.Location,
+                Subject = new SubjectDTO
+                {
+                    SubjectId = schedule.Subject.SubjectId,
+                    SubjectName = schedule.Subject.SubjectName,
+                    SubjectNumCredit = schedule.Subject.SubjectNumCredit
+                },
+                ScheduleTimes = schedule.ScheduleTimes.Select(scheduleTime => new ScheduleTimeDTO
+                {
+                    ScheduleTimeId = scheduleTime.ScheduleTimeId,
+                    DateStarted = scheduleTime.DateStarted,
+                    DateEnded = scheduleTime.DateEnded,
+                    ScheduleDayInWeeks = scheduleTime.ScheduleDayInWeeks.Select(scheduleDayInWeek => new ScheduleDayInWeekDTO
+                    {
+                        ScheduleDayInWeekId = scheduleDayInWeek.ScheduleDayInWeekId,
+                        Day = scheduleDayInWeek.Day,
+                        LessonStarted = scheduleDayInWeek.LessonStarted,
+                        LessonEnded = scheduleDayInWeek.LessonEnded
+                    }).ToList()
+                }).ToList()
+            })
+            .ToList();
+
+        return schedules;
+    }
+
     public void AddSchedule(AddScheduleDTO scheduleDto)
     {
         var schedule = new Schedule
@@ -158,6 +199,7 @@ public class ScheduleRepository
         using var dbContext = new HauCalendarContext();
 
         var schedule = dbContext.Schedules
+            .Include(s => s.Subject)
             .Include(s => s.ScheduleTimes)
             .ThenInclude(st => st.ScheduleDayInWeeks)
             .FirstOrDefault(s => s.ScheduleId == scheduleId);
@@ -166,6 +208,8 @@ public class ScheduleRepository
         {
             schedule.UserId = updatedScheduleDto.UserId;
             schedule.Location = updatedScheduleDto.Location;
+            schedule.Subject.SubjectName = updatedScheduleDto.SubjectName;
+            schedule.Subject.SubjectNumCredit = updatedScheduleDto.SubjectNumCredit;
 
             dbContext.ScheduleDayInWeeks.RemoveRange(schedule.ScheduleTimes.SelectMany(st => st.ScheduleDayInWeeks));
             dbContext.ScheduleTimes.RemoveRange(schedule.ScheduleTimes);

@@ -27,6 +27,13 @@ public class ScheduleController : ControllerBase
         return Ok(schedule);
     }
 
+    [HttpGet("getByDate")]
+    public IActionResult GetScheduleByDate(int userId, DateTime date)
+    {
+        var schedules = _scheduleRepository.GetScheduleByDate(userId, date);
+        return Ok(schedules);
+    }
+
     [HttpPost("create")]
     public IActionResult CreateSchedule([FromBody] AddScheduleDTO requestDto)
     {
