@@ -100,8 +100,6 @@ public class ScheduleRepository
             .Include(schedule => schedule.Subject)
             .Include(schedule => schedule.ScheduleTimes)
             .ThenInclude(scheduleTime => scheduleTime.ScheduleDayInWeeks)
-            .Where(schedule => schedule.ScheduleTimes
-                .Any(scheduleTime => scheduleTime.DateStarted.Date <= date.Date && scheduleTime.DateEnded.Date >= date.Date))
             .Select(schedule => new ScheduleDTO
             {
                 ScheduleId = schedule.ScheduleId,
@@ -118,14 +116,18 @@ public class ScheduleRepository
                     ScheduleTimeId = scheduleTime.ScheduleTimeId,
                     DateStarted = scheduleTime.DateStarted,
                     DateEnded = scheduleTime.DateEnded,
-                    ScheduleDayInWeeks = scheduleTime.ScheduleDayInWeeks.Select(scheduleDayInWeek => new ScheduleDayInWeekDTO
+                    ScheduleDayInWeeks = scheduleTime.ScheduleDayInWeeks.Where(scheduleDayInWeek =>
+                        scheduleDayInWeek.Day == (int)date.DayOfWeek &&
+                        scheduleTime.DateStarted.Date <= date.Date &&
+                        scheduleTime.DateEnded.Date >= date.Date
+                    ).Select(scheduleDayInWeek => new ScheduleDayInWeekDTO
                     {
                         ScheduleDayInWeekId = scheduleDayInWeek.ScheduleDayInWeekId,
                         Day = scheduleDayInWeek.Day,
                         LessonStarted = scheduleDayInWeek.LessonStarted,
                         LessonEnded = scheduleDayInWeek.LessonEnded
                     }).ToList()
-                }).ToList()
+                }).Where(scheduleTime => scheduleTime.ScheduleDayInWeeks.Any()).ToList()
             })
             .ToList();
 
