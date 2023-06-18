@@ -34,6 +34,13 @@ public class ScheduleController : ControllerBase
         return Ok(schedules);
     }
 
+    [HttpGet("getNearestSchedule")]
+    public IActionResult GetNearestScheduleByDate(int userId, DateTime date)
+    {
+        var schedules = _scheduleRepository.GetNearestScheduleByDayOfWeek(userId, date);
+        return Ok(schedules);
+    }
+
     [HttpPost("create")]
     public IActionResult CreateSchedule([FromBody] AddScheduleDTO requestDto)
     {

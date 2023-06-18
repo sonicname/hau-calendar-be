@@ -134,6 +134,58 @@ public class ScheduleRepository
         return schedules;
     }
 
+    public ScheduleDTO GetNearestScheduleByDayOfWeek(int userId, DateTime date)
+    {
+        using var dbContext = new HauCalendarContext();
+
+        var dayOfWeek = (int)date.DayOfWeek;
+        var currentDate = DateTime.Now.Date;
+
+        var schedule = dbContext.Schedules
+            .Where(schedule => schedule.UserId == userId)
+            .Include(schedule => schedule.Subject)
+            .Include(schedule => schedule.ScheduleTimes)
+            .ThenInclude(scheduleTime => scheduleTime.ScheduleDayInWeeks)
+            .Select(schedule => new ScheduleDTO
+            {
+                ScheduleId = schedule.ScheduleId,
+                UserId = schedule.UserId,
+                Location = schedule.Location,
+                Subject = new SubjectDTO
+                {
+                    SubjectId = schedule.Subject.SubjectId,
+                    SubjectName = schedule.Subject.SubjectName,
+                    SubjectNumCredit = schedule.Subject.SubjectNumCredit
+                },
+                ScheduleTimes = schedule.ScheduleTimes
+                    .Select(scheduleTime => new ScheduleTimeDTO
+                    {
+                        ScheduleTimeId = scheduleTime.ScheduleTimeId,
+                        DateStarted = scheduleTime.DateStarted,
+                        DateEnded = scheduleTime.DateEnded,
+                        ScheduleDayInWeeks = scheduleTime.ScheduleDayInWeeks
+                            .Where(sd => sd.Day >= dayOfWeek)
+                            .OrderBy(sd => Math.Abs((int)sd.Day - dayOfWeek))
+                            .Select(scheduleDayInWeek => new ScheduleDayInWeekDTO
+                            {
+                                ScheduleDayInWeekId = scheduleDayInWeek.ScheduleDayInWeekId,
+                                Day = scheduleDayInWeek.Day,
+                                LessonStarted = scheduleDayInWeek.LessonStarted,
+                                LessonEnded = scheduleDayInWeek.LessonEnded
+                            })
+                            .ToList()
+                    })
+                    .Where(scheduleTime => scheduleTime.ScheduleDayInWeeks.Any())
+                    .OrderBy(scheduleTime => Math.Abs((int)scheduleTime.DateStarted.DayOfWeek - dayOfWeek))
+                    .ToList()
+            })
+            .OrderBy(schedule => schedule.ScheduleTimes.Min(scheduleTime => Math.Abs((int)scheduleTime.DateStarted.DayOfWeek - dayOfWeek)))
+            .FirstOrDefault();
+
+        return schedule;
+    }
+
+
     public void AddSchedule(AddScheduleDTO scheduleDto)
     {
         var schedule = new Schedule
