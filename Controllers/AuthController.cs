@@ -3,8 +3,8 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using server.DTO.AuthDTOs;
 using server.Models;
-using server.Models.DTO;
 
 namespace server.Controllers
 {
@@ -21,7 +21,7 @@ namespace server.Controllers
             _configuration = config;
         }
 
-        private JwtSecurityToken? ClaimToken(String username)
+        private JwtSecurityToken? ClaimToken(string username)
         {
             var claims = new[] {
                 new Claim(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"]),
@@ -44,7 +44,7 @@ namespace server.Controllers
         [HttpPost("signin")]
         public IActionResult SignIn(UserDTO authParams)
         {
-            if (String.IsNullOrEmpty(authParams.Username) || String.IsNullOrEmpty(authParams.Password))
+            if (string.IsNullOrEmpty(authParams.Username) || string.IsNullOrEmpty(authParams.Password))
             {
                 return BadRequest("Username or Password is required!");
             }
@@ -71,7 +71,7 @@ namespace server.Controllers
         [HttpPost("signup")]
         public IActionResult SignUp(UserDTO authParams)
         {
-            if (String.IsNullOrEmpty(authParams.Username) || String.IsNullOrEmpty(authParams.Password))
+            if (string.IsNullOrEmpty(authParams.Username) || string.IsNullOrEmpty(authParams.Password))
             {
                 return BadRequest("Username or Password is required!");
             }
@@ -92,11 +92,7 @@ namespace server.Controllers
 
             var userAfterSave = _calendarContext.Users.FirstOrDefault(user => user.Username == authParams.Username);
 
-            return Ok(new AuthResponseDTO()
-            {
-                userID = userAfterSave.UserId,
-                accessToken = new JwtSecurityTokenHandler().WriteToken(ClaimToken(user.Username))
-            });
+            return Ok(userAfterSave);
         }
     }
 }

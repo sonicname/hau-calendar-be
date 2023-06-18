@@ -1,4 +1,4 @@
-﻿namespace server.Models.DTO;
+﻿namespace server.DTO.ScheduleDTOs;
 
 public class ScheduleDTO
 {

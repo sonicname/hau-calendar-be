@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using server.Models;
-using server.Models.DTO;
+using server.DTO.ScheduleDTOs;
 using server.Repository;
 namespace server.Controllers;
 
@@ -14,15 +13,22 @@ public class ScheduleController : ControllerBase
         _scheduleRepository = scheduleRepository;
     }
 
-    [HttpGet("get")]
+    [HttpGet("getAll")]
     public IActionResult GetSchedule(int userID)
     {
         var schedules = _scheduleRepository.GetAll(userID);
         return Ok(schedules);
     }
 
-    [HttpPut("create")]
-    public IActionResult CreateSchedule([FromBody] AddScheduleDto requestDto) // missing params
+    [HttpGet("{id:int}")]
+    public IActionResult GetScheduleByID(int id)
+    {
+        var schedule = _scheduleRepository.GetScheduleById(id);
+        return Ok(schedule);
+    }
+
+    [HttpPost("create")]
+    public IActionResult CreateSchedule([FromBody] AddScheduleDTO requestDto)
     {
         _scheduleRepository.AddSchedule(requestDto);
         return Ok(requestDto);
@@ -35,9 +41,10 @@ public class ScheduleController : ControllerBase
         return Ok();
     }
 
-    [HttpPatch("update")]
-    public IActionResult UpdateSchedule(string scheduleID) // missing params
+    [HttpPut("update")]
+    public IActionResult UpdateSchedule([FromBody] UpdatedScheduleDTO updatedScheduleDTO)
     {
+        _scheduleRepository.UpdateSchedule(updatedScheduleDTO.ScheduleId, updatedScheduleDTO);
         return Ok();
     }
 }

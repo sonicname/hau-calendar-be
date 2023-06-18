@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using server.DTO.ScheduleDTOs;
 using server.Models;
-using server.Models.DTO;
 
 namespace server.Repository;
 
@@ -10,7 +10,6 @@ public class ScheduleRepository
 
     public List<ScheduleDTO> GetAll(int userId)
     {
-
         List<ScheduleDTO> scheduleDTOs;
 
         using (var dbContext = new HauCalendarContext())
@@ -47,7 +46,52 @@ public class ScheduleRepository
         return scheduleDTOs;
     }
 
-    public void AddSchedule(AddScheduleDto scheduleDto)
+    public ScheduleDTO? GetScheduleById(int scheduleId)
+    {
+        using var dbContext = new HauCalendarContext();
+
+        var schedule = dbContext.Schedules
+            .Where(s => s.ScheduleId == scheduleId)
+            .Include(s => s.Subject)
+            .Include(s => s.ScheduleTimes)
+            .ThenInclude(st => st.ScheduleDayInWeeks)
+            .FirstOrDefault();
+
+        if (schedule != null)
+        {
+            var scheduleDto = new ScheduleDTO
+            {
+                ScheduleId = schedule.ScheduleId,
+                UserId = schedule.UserId,
+                Location = schedule.Location,
+                Subject = new SubjectDTO
+                {
+                    SubjectId = schedule.Subject.SubjectId,
+                    SubjectName = schedule.Subject.SubjectName,
+                    SubjectNumCredit = schedule.Subject.SubjectNumCredit
+                },
+                ScheduleTimes = schedule.ScheduleTimes.Select(scheduleTime => new ScheduleTimeDTO
+                {
+                    ScheduleTimeId = scheduleTime.ScheduleTimeId,
+                    DateStarted = scheduleTime.DateStarted,
+                    DateEnded = scheduleTime.DateEnded,
+                    ScheduleDayInWeeks = scheduleTime.ScheduleDayInWeeks.Select(scheduleDayInWeek => new ScheduleDayInWeekDTO
+                    {
+                        ScheduleDayInWeekId = scheduleDayInWeek.ScheduleDayInWeekId,
+                        Day = scheduleDayInWeek.Day,
+                        LessonStarted = scheduleDayInWeek.LessonStarted,
+                        LessonEnded = scheduleDayInWeek.LessonEnded
+                    }).ToList()
+                }).ToList()
+            };
+
+            return scheduleDto;
+        }
+
+        return null;
+    }
+
+    public void AddSchedule(AddScheduleDTO scheduleDto)
     {
         var schedule = new Schedule
         {
@@ -104,6 +148,51 @@ public class ScheduleRepository
             dbContext.ScheduleDayInWeeks.RemoveRange(schedule.ScheduleTimes.SelectMany(st => st.ScheduleDayInWeeks));
             dbContext.ScheduleTimes.RemoveRange(schedule.ScheduleTimes);
             dbContext.Schedules.Remove(schedule);
+
+            dbContext.SaveChanges();
+        }
+    }
+
+    public void UpdateSchedule(int scheduleId, UpdatedScheduleDTO updatedScheduleDto)
+    {
+        using var dbContext = new HauCalendarContext();
+
+        var schedule = dbContext.Schedules
+            .Include(s => s.ScheduleTimes)
+            .ThenInclude(st => st.ScheduleDayInWeeks)
+            .FirstOrDefault(s => s.ScheduleId == scheduleId);
+
+        if (schedule != null)
+        {
+            schedule.UserId = updatedScheduleDto.UserId;
+            schedule.Location = updatedScheduleDto.Location;
+
+            dbContext.ScheduleDayInWeeks.RemoveRange(schedule.ScheduleTimes.SelectMany(st => st.ScheduleDayInWeeks));
+            dbContext.ScheduleTimes.RemoveRange(schedule.ScheduleTimes);
+
+            foreach (var updatedScheduleTimeDto in updatedScheduleDto.Dates)
+            {
+                var scheduleTime = new ScheduleTime
+                {
+                    DateStarted = DateTime.Parse(updatedScheduleTimeDto.DateStartEnd[0]),
+                    DateEnded = DateTime.Parse(updatedScheduleTimeDto.DateStartEnd[1]),
+                    ScheduleDayInWeeks = new List<ScheduleDayInWeek>()
+                };
+
+                foreach (var updatedScheduleDayInWeekDto in updatedScheduleTimeDto.Days)
+                {
+                    var scheduleDayInWeek = new ScheduleDayInWeek
+                    {
+                        Day = updatedScheduleDayInWeekDto.Days,
+                        LessonStarted = updatedScheduleDayInWeekDto.LessonStartEnd[0],
+                        LessonEnded = updatedScheduleDayInWeekDto.LessonStartEnd[1]
+                    };
+
+                    scheduleTime.ScheduleDayInWeeks.Add(scheduleDayInWeek);
+                }
+
+                schedule.ScheduleTimes.Add(scheduleTime);
+            }
 
             dbContext.SaveChanges();
         }

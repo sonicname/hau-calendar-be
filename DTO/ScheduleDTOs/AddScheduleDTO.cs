@@ -1,6 +1,6 @@
-﻿namespace server.Models.DTO;
+﻿namespace server.DTO.ScheduleDTOs;
 
-public class AddScheduleDto
+public class AddScheduleDTO
 {
     public int UserId { get; set; }
     public int Location { get; set; }
