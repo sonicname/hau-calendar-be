@@ -10,4 +10,6 @@ public class ScheduleDayInWeekDTO
     public int LessonEnded { get; set; }
 
     public int? ScheduleTimeId { get; set; }
+
+
 }

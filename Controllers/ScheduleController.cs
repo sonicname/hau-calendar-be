@@ -35,9 +35,10 @@ public class ScheduleController : ControllerBase
     }
 
     [HttpGet("getNearestSchedule")]
-    public IActionResult GetNearestScheduleByDate(int userId, DateTime date)
+    public IActionResult GetNearestScheduleByDate(int userID, DateTime date)
     {
-        var schedules = _scheduleRepository.GetNearestScheduleByDayOfWeek(userId, date);
+        var schedules = _scheduleRepository.GetNearestScheduleByDate(userID, date);
+
         return Ok(schedules);
     }
 
@@ -46,6 +47,14 @@ public class ScheduleController : ControllerBase
     {
         _scheduleRepository.AddSchedule(requestDto);
         return Ok(requestDto);
+    }
+
+    [HttpGet("checkDuplicate")]
+    public IActionResult CheckDuplicateSchedule(int userID, int lessonStarted, int lessonEnded, DateTime dateStarted, DateTime dateEnded, int day)
+    {
+        var isDuplicate = _scheduleRepository.CheckDuplicateSchedule(userID, lessonStarted, lessonEnded, dateStarted, dateEnded, day);
+
+        return Ok(isDuplicate);
     }
 
     [HttpDelete("delete")]

@@ -248,6 +248,65 @@ public class ScheduleRepository
         }
     }
 
+    public ScheduleDTO? GetNearestScheduleByDate(int userId, DateTime date)
+    {
+        using var dbContext = new HauCalendarContext();
+
+        var schedule = dbContext.Schedules
+            .Where(s => s.UserId == userId)
+            .Include(s => s.Subject)
+            .Include(s => s.ScheduleTimes)
+            .ThenInclude(st => st.ScheduleDayInWeeks)
+            .Select(schedule => new ScheduleDTO
+            {
+                ScheduleId = schedule.ScheduleId,
+                UserId = schedule.UserId,
+                Location = schedule.Location,
+                Subject = new SubjectDTO
+                {
+                    SubjectId = schedule.Subject.SubjectId,
+                    SubjectName = schedule.Subject.SubjectName,
+                    SubjectNumCredit = schedule.Subject.SubjectNumCredit
+                },
+                ScheduleTimes = schedule.ScheduleTimes.Select(scheduleTime => new ScheduleTimeDTO
+                {
+                    ScheduleTimeId = scheduleTime.ScheduleTimeId,
+                    DateStarted = scheduleTime.DateStarted,
+                    DateEnded = scheduleTime.DateEnded,
+                    ScheduleDayInWeeks = scheduleTime.ScheduleDayInWeeks.Select(scheduleDayInWeek => new ScheduleDayInWeekDTO
+                    {
+                        ScheduleDayInWeekId = scheduleDayInWeek.ScheduleDayInWeekId,
+                        Day = scheduleDayInWeek.Day,
+                        LessonStarted = scheduleDayInWeek.LessonStarted,
+                        LessonEnded = scheduleDayInWeek.LessonEnded
+                    }).ToList()
+                }).ToList()
+            })
+            .ToList();
+
+        ScheduleDTO? nearestSchedule = null;
+        TimeSpan nearestDiff = TimeSpan.MaxValue;
+
+        foreach (var s in schedule)
+        {
+            foreach (var st in s.ScheduleTimes)
+            {
+                foreach (var sd in st.ScheduleDayInWeeks)
+                {
+                    // Tính khoảng cách thời gian từ ngày đang xét đến lịch học
+                    TimeSpan diff = (date.Date - st.DateStarted.Date).Duration();
+
+                    if (sd.Day == (int)date.DayOfWeek && diff < nearestDiff)
+                    {
+                        nearestDiff = diff;
+                        nearestSchedule = s;
+                    }
+                }
+            }
+        }
+
+        return nearestSchedule;
+    }
     public void UpdateSchedule(int scheduleId, UpdatedScheduleDTO updatedScheduleDto)
     {
         using var dbContext = new HauCalendarContext();
@@ -294,5 +353,28 @@ public class ScheduleRepository
 
             dbContext.SaveChanges();
         }
+    }
+
+    public bool CheckDuplicateSchedule(int userId, int lessonStarted, int lessonEnded, DateTime dateStarted, DateTime dateEnded, int day)
+    {
+        using var dbContext = new HauCalendarContext();
+        bool isDuplicate = dbContext.Schedules.Any(schedule =>
+            schedule.UserId == userId &&
+            schedule.ScheduleTimes.Any(scheduleTime =>
+                (scheduleTime.DateStarted.Date >= dateStarted.Date && scheduleTime.DateStarted.Date <= dateEnded.Date) ||
+                (scheduleTime.DateEnded.Date >= dateStarted.Date && scheduleTime.DateEnded.Date <= dateEnded.Date)
+            ) &&
+            schedule.ScheduleTimes.Any(scheduleTime =>
+                scheduleTime.ScheduleDayInWeeks.Any(scheduleDayInWeek =>
+                    scheduleDayInWeek.Day == day &&
+                    (
+                        (scheduleDayInWeek.LessonStarted >= lessonStarted && scheduleDayInWeek.LessonStarted <= lessonEnded) ||
+                        (scheduleDayInWeek.LessonEnded >= lessonStarted && scheduleDayInWeek.LessonEnded <= lessonEnded)
+                    )
+                )
+            )
+        );
+
+        return isDuplicate;
     }
 }
